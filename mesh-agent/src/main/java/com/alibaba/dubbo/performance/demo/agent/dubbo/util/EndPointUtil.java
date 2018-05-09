@@ -12,9 +12,10 @@ import java.util.List;
  */
 public class EndPointUtil {
     static Object lock = new Object();
-    static IRegistry registry = new EtcdRegistry(System.getProperty("etcd.url"));
-    static List<Endpoint> endpoints= new LinkedList<>();
-    static {
+    static IRegistry registry = new EtcdRegistry(PropertyUtil.ETCD);
+    public static volatile EndpointTuber bestEndpointer;
+    public static List<Endpoint> endpoints= new LinkedList<>();
+    public static void getEndpoints(){
         if (null == endpoints) {
             synchronized (lock) {
                 if (null == endpoints) {

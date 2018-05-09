@@ -1,5 +1,8 @@
 package com.alibaba.dubbo.performance.demo.agent.dubbo.Message;
 
+import com.alibaba.dubbo.performance.demo.agent.dubbo.util.EndPointUtil;
+import com.alibaba.dubbo.performance.demo.agent.dubbo.util.EndpointTuber;
+import com.alibaba.dubbo.performance.demo.agent.registry.Endpoint;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -8,30 +11,42 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 public class ConMsgHandler extends SimpleChannelInboundHandler<ByteBuf> {
+
+    private Endpoint endpoint;
+    Map<Endpoint,Long> endpointLongMap = new ConcurrentHashMap<>();
+
+    public ConMsgHandler(Endpoint endpoint, Map<Endpoint, Long> endpointLongMap) {
+        this.endpoint = endpoint;
+        this.endpointLongMap = endpointLongMap;
+    }
+
+    private Long sendTime;
     private Logger logger = LoggerFactory.getLogger(ConMsgHandler.class);
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        Calendar cal = Calendar.getInstance();
-        Date date = cal.getTime();
-        String dateFormat =new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss:SSS").format(date);
-        ctx.writeAndFlush(dateFormat);
+        sendTime = System.currentTimeMillis();
+        ctx.writeAndFlush(sendTime);
     }
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) throws Exception {
-        String preCalDate = msg.toString(CharsetUtil.UTF_8);
-        SimpleDateFormat preSimpleDateFormat = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss:SSS");
-        Date preDate = preSimpleDateFormat.parse(preCalDate);
+        String getMsg = msg.toString(CharsetUtil.UTF_8);
 
-        Calendar calendar = Calendar.getInstance();
-        Date nowDate = calendar.getTime();
+        Long getSendTime = Long.parseLong(getMsg);
 
-        long val=  nowDate.getTime() - preDate.getTime();
+        Long currentTime = System.currentTimeMillis();
+        Long time=  currentTime - getSendTime;
+
+        EndpointTuber endpointTuber = new EndpointTuber(endpoint,time);
+        if (time<EndPointUtil.bestEndpointer.getTime()||EndPointUtil.bestEndpointer==null)
+            EndPointUtil.bestEndpointer = endpointTuber;
+
+        endpointLongMap.put(endpoint,time);
 
         //System.out.println(val);
     }

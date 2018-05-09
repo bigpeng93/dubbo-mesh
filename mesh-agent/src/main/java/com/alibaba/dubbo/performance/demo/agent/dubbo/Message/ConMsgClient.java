@@ -1,5 +1,6 @@
 package com.alibaba.dubbo.performance.demo.agent.dubbo.Message;
 
+import com.alibaba.dubbo.performance.demo.agent.registry.Endpoint;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -9,14 +10,19 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 
 import java.net.InetSocketAddress;
+import java.util.Map;
 
 public class ConMsgClient implements Runnable{
     private final String host;
     private final int port;
 
-    public ConMsgClient(String host, int port) {
-        this.host = host;
-        this.port = port;
+    private Endpoint endpoint;
+    private Map<Endpoint,Long> endpointLongMap;
+
+    public ConMsgClient(Endpoint endpoint,Map<Endpoint,Long> endpointLongMap) {
+        this.host = endpoint.getHost();
+        this.port = endpoint.getPort();
+        this.endpointLongMap = endpointLongMap;
     }
 
     public void run() {
@@ -29,7 +35,7 @@ public class ConMsgClient implements Runnable{
                     .handler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel ch) throws Exception {
-                            ch.pipeline().addLast(new ConMsgHandler());
+                            ch.pipeline().addLast(new ConMsgHandler(endpoint,endpointLongMap));
                         }
                     });
             ChannelFuture f = b.connect().sync();
