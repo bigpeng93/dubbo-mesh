@@ -11,6 +11,7 @@ import com.sun.xml.internal.messaging.saaj.soap.Envelope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.stereotype.Service;
 
 
 import java.text.MessageFormat;
@@ -20,6 +21,7 @@ import java.util.List;
  * 用于Consumer端的获取etcd服务列表，并创建线程通过Watcher循环监听etcd
  */
 
+@Service
 public class EventConsumer implements InitializingBean{
     private Logger logger = LoggerFactory.getLogger(EventConsumer.class);
     private final String rootPath = "dubbomesh";
