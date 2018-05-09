@@ -31,36 +31,33 @@ public class EventConsumer implements InitializingBean{
         //根据配置信息，调用相应的handler
         if (PropertyUtil.TYPE.equals("consumer")){
             handler = (EventHandler) SpringContextUtil.getBean("ConsumerHandler.class");
-        }else if (PropertyUtil.TYPE.equals("provider")){
-            handler = (EventHandler) SpringContextUtil.getBean("ProviderHandler.class");
-        }
-        if (handler == null){
-            throw new RuntimeException("no type or handler");
-        }else {
+            if (handler == null){
+                throw new RuntimeException("no type or handler");
+            }else {
 
-            handler.doHandle();
+                handler.doHandle();
 
-            Thread thread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    while (true) {
-                        Client client = Client.builder().endpoints(PropertyUtil.TYPE).build();
-                        String strKey = MessageFormat.format("/{0}/{1}",rootPath,serviceName);
-                        ByteSequence key  = ByteSequence.fromString(strKey);
-                        Watch.Watcher watcher = client.getWatchClient().watch(key);
-                        try {
-                            List<WatchEvent> event = watcher.listen().getEvents();
-                            if (event!=null){
-                                EndPointUtil.getEndpoints();
+                Thread thread = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        while (true) {
+                            Client client = Client.builder().endpoints(PropertyUtil.TYPE).build();
+                            String strKey = MessageFormat.format("/{0}/{1}", rootPath, serviceName);
+                            ByteSequence key = ByteSequence.fromString(strKey);
+                            Watch.Watcher watcher = client.getWatchClient().watch(key);
+                            try {
+                                List<WatchEvent> event = watcher.listen().getEvents();
+                                if (event != null) {
+                                    EndPointUtil.getEndpoints();
+                                }
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
                             }
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
                         }
                     }
-                }
-            });
-            thread.start();
-
+                });
+                thread.start();
+            }
         }
     }
 }
