@@ -7,9 +7,11 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import org.springframework.stereotype.Service;
 
 import java.net.InetSocketAddress;
 
+@Service
 public class ProMsgServer implements Runnable{
     private final int port;
     public ProMsgServer(int port){

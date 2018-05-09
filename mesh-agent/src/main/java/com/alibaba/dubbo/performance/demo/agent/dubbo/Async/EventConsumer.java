@@ -7,6 +7,7 @@ import com.coreos.jetcd.Client;
 import com.coreos.jetcd.Watch;
 import com.coreos.jetcd.data.ByteSequence;
 import com.coreos.jetcd.watch.WatchEvent;
+import com.sun.xml.internal.messaging.saaj.soap.Envelope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -58,6 +59,9 @@ public class EventConsumer implements InitializingBean{
                 });
                 thread.start();
             }
+        }else if (PropertyUtil.TYPE.equals("provider")){
+            handler = (EventHandler) SpringContextUtil.getBean("ProviderHandler.class");
+            handler.doHandle();
         }
     }
 }

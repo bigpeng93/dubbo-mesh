@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 
 public class ConMsgHandler extends SimpleChannelInboundHandler<ByteBuf> {
@@ -47,7 +48,7 @@ public class ConMsgHandler extends SimpleChannelInboundHandler<ByteBuf> {
             EndPointUtil.bestEndpointer = endpointTuber;
 
         endpointLongMap.put(endpoint,time);
-
+        ctx.executor().schedule(new HeartBeatTask(ctx),5,TimeUnit.SECONDS);
         //System.out.println(val);
     }
 
@@ -55,5 +56,17 @@ public class ConMsgHandler extends SimpleChannelInboundHandler<ByteBuf> {
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         cause.printStackTrace();
         ctx.close();
+    }
+    private class HeartBeatTask implements Runnable{
+        private ChannelHandlerContext ctx;
+        public HeartBeatTask(ChannelHandlerContext ctx) {
+            this.ctx = ctx;
+        }
+
+        @Override
+        public void run() {
+            Long sendTime = System.currentTimeMillis();
+            ctx.writeAndFlush(sendTime);
+        }
     }
 }
