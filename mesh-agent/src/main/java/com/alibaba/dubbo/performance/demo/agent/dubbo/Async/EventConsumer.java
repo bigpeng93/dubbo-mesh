@@ -9,10 +9,8 @@ import com.coreos.jetcd.data.ByteSequence;
 import com.coreos.jetcd.watch.WatchEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
+
 
 import java.text.MessageFormat;
 import java.util.List;
@@ -61,6 +59,7 @@ public class EventConsumer implements InitializingBean{
                     }
                 }
             });
+            thread.start();
 
         }
     }
