@@ -12,8 +12,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ProviderHandler implements EventHandler {
 
-    @Autowired
-    ProMsgServer proMsgServer;
+    ProMsgServer proMsgServer = new ProMsgServer();
 
     @Override
     public void doHandle() {

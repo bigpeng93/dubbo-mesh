@@ -13,12 +13,7 @@ import java.net.InetSocketAddress;
 
 @Service
 public class ProMsgServer implements Runnable{
-    private final int port;
-    public ProMsgServer(int port){
-        this.port = port;
-    }
-
-
+    int port =9001;
     @Override
     public void run() {
         final ProMsgHandler proMsgHandler = new ProMsgHandler();

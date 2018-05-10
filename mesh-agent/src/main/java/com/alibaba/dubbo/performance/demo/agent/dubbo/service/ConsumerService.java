@@ -1,9 +1,11 @@
 package com.alibaba.dubbo.performance.demo.agent.dubbo.service;
 
+import com.alibaba.dubbo.performance.demo.agent.dubbo.model.HostHolder;
 import com.alibaba.dubbo.performance.demo.agent.dubbo.util.EndPointUtil;
 import com.alibaba.dubbo.performance.demo.agent.registry.Endpoint;
 import com.alibaba.fastjson.JSON;
 import okhttp3.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -14,12 +16,18 @@ import java.io.IOException;
 @Service
 public class ConsumerService {
 
+    @Autowired
+    EndPointUtil endPointUtil;
+
+    @Autowired
+    HostHolder hostHolder;
+
     private OkHttpClient httpClient = new OkHttpClient();
 
     public Integer consumer(String interfaceName,String method,String parameterTypesString,String parameter) throws Exception {
 
         // 简单的负载均衡，随机取一个
-        Endpoint endpoint = EndPointUtil.bestEndpointer.getEndpoint();
+        Endpoint endpoint = hostHolder.getEndpoint();
 
         String url =  "http://" + endpoint.getHost() + ":" + endpoint.getPort();
 

@@ -1,5 +1,6 @@
 package com.alibaba.dubbo.performance.demo.agent.dubbo.Message;
 
+import com.alibaba.dubbo.performance.demo.agent.dubbo.model.HostHolder;
 import com.alibaba.dubbo.performance.demo.agent.dubbo.util.EndPointUtil;
 import com.alibaba.dubbo.performance.demo.agent.dubbo.util.EndpointTuber;
 import com.alibaba.dubbo.performance.demo.agent.registry.Endpoint;
@@ -9,6 +10,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.util.CharsetUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -17,6 +19,12 @@ import java.util.concurrent.TimeUnit;
 
 
 public class ConMsgHandler extends SimpleChannelInboundHandler<ByteBuf> {
+
+    @Autowired
+    EndPointUtil endPointUtil;
+
+    @Autowired
+    HostHolder hostHolder;
 
     private Endpoint endpoint;
     Map<Endpoint,Long> endpointLongMap = new ConcurrentHashMap<>();
@@ -44,8 +52,8 @@ public class ConMsgHandler extends SimpleChannelInboundHandler<ByteBuf> {
         Long time=  currentTime - getSendTime;
 
         EndpointTuber endpointTuber = new EndpointTuber(endpoint,time);
-        if (time<EndPointUtil.bestEndpointer.getTime()||EndPointUtil.bestEndpointer==null)
-            EndPointUtil.bestEndpointer = endpointTuber;
+        if (time<endPointUtil.bestEndpointer.getTime()||endPointUtil.bestEndpointer==null)
+            hostHolder.setEndpoints(endpointTuber.getEndpoint());
 
         endpointLongMap.put(endpoint,time);
         ctx.executor().schedule(new HeartBeatTask(ctx),5,TimeUnit.SECONDS);

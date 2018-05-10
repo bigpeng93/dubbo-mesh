@@ -1,5 +1,7 @@
 package com.alibaba.dubbo.performance.demo.agent.dubbo.Async;
 
+import com.alibaba.dubbo.performance.demo.agent.dubbo.Async.handler.ConsumerHandler;
+import com.alibaba.dubbo.performance.demo.agent.dubbo.Async.handler.ProviderHandler;
 import com.alibaba.dubbo.performance.demo.agent.dubbo.util.EndPointUtil;
 import com.alibaba.dubbo.performance.demo.agent.dubbo.util.PropertyUtil;
 import com.alibaba.dubbo.performance.demo.agent.dubbo.util.SpringContextUtil;
@@ -11,6 +13,7 @@ import com.sun.xml.internal.messaging.saaj.soap.Envelope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
@@ -26,19 +29,23 @@ public class EventConsumer implements InitializingBean{
     private Logger logger = LoggerFactory.getLogger(EventConsumer.class);
     private final String rootPath = "dubbomesh";
     private final String serviceName = "com.alibaba.dubbo.performance.demo.provider.IHelloService";
-    private EventHandler handler;
+
+    @Autowired
+    ConsumerHandler consumerHandler;
+
+    @Autowired
+    ProviderHandler providerHandler;
+
+    @Autowired
+    EndPointUtil endPointUtil;
+
     @Override
     public void afterPropertiesSet() throws Exception {
         //缓存endpoint
-        EndPointUtil.getEndpoints();
+        endPointUtil.getEndpoints();
         //根据配置信息，调用相应的handler
         if (PropertyUtil.TYPE.equals("consumer")){
-            handler = (EventHandler) SpringContextUtil.getBean("ConsumerHandler.class");
-            if (handler == null){
-                throw new RuntimeException("no type or handler");
-            }else {
-
-                handler.doHandle();
+                consumerHandler.doHandle(endPointUtil);
 
                 Thread thread = new Thread(new Runnable() {
                     @Override
@@ -51,7 +58,7 @@ public class EventConsumer implements InitializingBean{
                             try {
                                 List<WatchEvent> event = watcher.listen().getEvents();
                                 if (event != null) {
-                                    EndPointUtil.getEndpoints();
+                                    endPointUtil.getEndpoints();
                                 }
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
@@ -60,10 +67,9 @@ public class EventConsumer implements InitializingBean{
                     }
                 });
                 thread.start();
-            }
+
         }else if (PropertyUtil.TYPE.equals("provider")){
-            handler = (EventHandler) SpringContextUtil.getBean("ProviderHandler.class");
-            handler.doHandle();
+            providerHandler.doHandle();
         }
     }
 }
