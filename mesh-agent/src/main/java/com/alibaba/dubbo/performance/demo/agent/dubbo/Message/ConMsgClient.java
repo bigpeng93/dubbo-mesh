@@ -21,7 +21,7 @@ public class ConMsgClient implements Runnable{
 
     public ConMsgClient(Endpoint endpoint,Map<Endpoint,Long> endpointLongMap) {
         this.host = endpoint.getHost();
-        this.port = endpoint.getPort();
+        this.port = 9001;
         this.endpointLongMap = endpointLongMap;
     }
 
